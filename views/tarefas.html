@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumo de Tarefas</title>
+</head>
+<body>
+  <h1>Resumo de Tarefas</h1>
+
+  <h2>A Fazer</h2>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Nome da Tarefa</th>
+      </tr>
+    </thead>
+    <tbody id="todoTableBody">
+      <!-- Tarefas "A Fazer" serão inseridas aqui -->
+    </tbody>
+  </table>
+
+  <h2>Fazendo</h2>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Nome da Tarefa</th>
+      </tr>
+    </thead>
+    <tbody id="doingTableBody">
+      <!-- Tarefas "Fazendo" serão inseridas aqui -->
+    </tbody>
+  </table>
+
+  <h2>Feito</h2>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Nome da Tarefa</th>
+      </tr>
+    </thead>
+    <tbody id="doneTableBody">
+      <!-- Tarefas "Feito" serão inseridas aqui -->
+    </tbody>
+  </table>
+
+  <br>
+  <button onclick="window.location.href='/gerenciar'">Voltar para Gerenciar</button>
+
+  <script>
+    // Função para carregar as tarefas do backend
+    async function carregarResumo() {
+      try {
+        const response = await fetch('/api/tarefas'); // Chama a API para buscar as tarefas
+        const tarefas = await response.json();
+
+        // Seleciona os corpos das tabelas
+        const todoTableBody = document.getElementById('todoTableBody');
+        const doingTableBody = document.getElementById('doingTableBody');
+        const doneTableBody = document.getElementById('doneTableBody');
+
+        // Limpa as tabelas antes de renderizar
+        todoTableBody.innerHTML = '';
+        doingTableBody.innerHTML = '';
+        doneTableBody.innerHTML = '';
+
+        // Adiciona as tarefas nas tabelas correspondentes
+        tarefas.forEach(tarefa => {
+          const row = document.createElement('tr');
+          const nameCell = document.createElement('td');
+          nameCell.textContent = tarefa.nome;
+          row.appendChild(nameCell);
+
+          if (tarefa.status === 'todo') {
+            todoTableBody.appendChild(row);
+          } else if (tarefa.status === 'doing') {
+            doingTableBody.appendChild(row);
+          } else if (tarefa.status === 'done') {
+            doneTableBody.appendChild(row);
+          }
+        });
+      } catch (err) {
+        console.error('Erro ao carregar tarefas:', err);
+      }
+    }
+
+    // Carrega as tarefas ao abrir a página
+    carregarResumo();
+  </script>
+</body>
+</html>

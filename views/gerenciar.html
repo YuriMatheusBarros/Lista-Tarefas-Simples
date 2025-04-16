@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciamento de Lista de Tarefas</title>
+</head>
+<body>
+  <div>
+    <form id="taskForm">
+      <input type="text" id="taskName" name="taskName" placeholder="Nome da tarefa" required>
+      <select id="taskStatus" name="taskStatus">
+        <option value="todo">A Fazer</option>
+        <option value="doing">Fazendo</option>
+        <option value="done">Feito</option>
+      </select>
+      <button type="submit">Adicionar Tarefa</button>
+    </form>
+    <div id="todo">
+      <h2>A Fazer</h2>
+      <!-- Tarefas "A Fazer" serão listadas aqui -->
+    </div>
+    <div id="doing">
+      <h2>Fazendo</h2>
+      <!-- Tarefas "Fazendo" serão listadas aqui -->
+    </div>
+    <div id="done">
+      <h2>Feito</h2>
+      <!-- Tarefas "Feito" serão listadas aqui -->
+    </div>
+  </div>
+  <div>
+    <button onclick="window.location.href='/tarefas'">Resumo de Tarefas</button>
+  </div>
+  <br>
+  <div>
+    <button onclick="window.location.href='/'">Voltar a pagina principal</button>
+  </div>
+
+  <script>
+    // Função para carregar as tarefas do backend
+    async function carregarTarefas() {
+      try {
+        const response = await fetch('/api/tarefas'); // Chama a API para buscar as tarefas
+        const tarefas = await response.json();
+
+        // Renderiza as tarefas nas respectivas divs
+        const todoDiv = document.getElementById('todo');
+        const doingDiv = document.getElementById('doing');
+        const doneDiv = document.getElementById('done');
+
+        // Limpa as divs antes de renderizar
+        todoDiv.innerHTML = '<h2>A Fazer</h2>';
+        doingDiv.innerHTML = '<h2>Fazendo</h2>';
+        doneDiv.innerHTML = '<h2>Feito</h2>';
+
+        tarefas.forEach(tarefa => {
+          const taskElement = document.createElement('p');
+          taskElement.textContent = tarefa.nome;
+
+          if (tarefa.status === 'todo') {
+            todoDiv.appendChild(taskElement);
+          } else if (tarefa.status === 'doing') {
+            doingDiv.appendChild(taskElement);
+          } else if (tarefa.status === 'done') {
+            doneDiv.appendChild(taskElement);
+          }
+        });
+      } catch (err) {
+        console.error('Erro ao carregar tarefas:', err);
+      }
+    }
+
+    // Carrega as tarefas ao abrir a página
+    carregarTarefas();
+
+    // Adiciona uma nova tarefa
+    document.getElementById('taskForm').addEventListener('submit', async function (event) {
+      event.preventDefault(); // Impede o envio padrão do formulário
+
+      const taskName = document.getElementById('taskName').value;
+      const taskStatus = document.getElementById('taskStatus').value;
+
+      try {
+        const response = await fetch('/adicionar-tarefa', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ taskName, taskStatus }),
+        });
+
+        if (response.ok) {
+          // Recarrega as tarefas após adicionar uma nova
+          carregarTarefas();
+
+          // Limpa o formulário
+          document.getElementById('taskName').value = '';
+          document.getElementById('taskStatus').value = 'todo';
+        } else {
+          console.error('Erro ao adicionar tarefa:', await response.text());
+        }
+      } catch (err) {
+        console.error('Erro ao enviar tarefa:', err);
+      }
+    });
+  </script>
+</body>
+</html>
